@@ -1,5 +1,66 @@
 #include "constants.h"
 
+struct AcceptedSocket{
+    int acceptedSocketFD;
+    struct sockaddr_in address;
+    int error;
+    bool acceptedSuccessfully;
+};
+
+
+void receiveAndPrintIncomingData(int socketFD){
+    char buffer[1024];
+
+    while(1){
+        ssize_t receivedAmount = recv(socketFD, &buffer, 1024, 0);
+        if(receivedAmount>0){
+            printf("Message: %s \n", buffer);
+        }else
+            break;
+    }
+
+    close(socketFD);
+}
+
+void receiveAndPrintIncomingDataOnSeparateThread(struct AcceptedSocket* pSocket){
+    pthread_t id;
+    pthread_create(&id, NULL, (void *)receiveAndPrintIncomingData, (void *) pSocket->acceptedSocketFD);
+}
+
+struct AcceptedSocket* acceptIncomgingConnection(int serverSocketFD){
+
+    struct sockaddr_in clientAddress;
+    int clientAddresSize = sizeof(clientAddress);
+    int clientSocketFD = accept(serverSocketFD, (struct sockaddr*)&clientAddress, &clientAddresSize);
+
+    struct AcceptedSocket* acceptedSocket = malloc(sizeof(struct AcceptedSocket) );
+
+    acceptedSocket->address = clientAddress;
+    acceptedSocket->acceptedSocketFD = clientSocketFD;
+    acceptedSocket->acceptedSuccessfully = clientSocketFD>0;
+
+    if(!acceptedSocket->acceptedSuccessfully){
+        acceptedSocket->error = clientSocketFD;
+    }
+
+    return acceptedSocket;
+}
+
+void startAcceptingIncomingConnections(int serverFD){
+    while(1){
+        struct AcceptedSocket* clientFD = acceptIncomgingConnection(serverFD);
+        receiveAndPrintIncomingDataOnSeparateThread(clientFD);
+    } 
+
+}
+
+
+
+
+
+
+
+
 int main(int argc, char* argv[]){
     int port = 2000;
     char* ip = "";
@@ -25,28 +86,9 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
-    struct sockaddr_in clientAddress;
-    int clientAddresSize = sizeof(clientAddress);
-    int clientFD = accept(serverFD, (struct sockaddr*)&clientAddress, &clientAddresSize);
-
-    if(clientFD==-1){
-        perror("Accept error");
-        return -1;
-    }
-
-    char* line = NULL;
-    size_t lineSize = 0;
-    char buffer[1024];
-
-    while(1){
-        ssize_t receivedAmount = recv(clientFD, &buffer, 1024, 0);
-        if(receivedAmount>0){
-            printf("Message: %s \n", buffer);
-        }else
-            break;
-    }
-    close(clientFD);
-    shutdown(serverFD, SHUT_RDWR);
+    startAcceptingIncomingConnections(serverFD);
+    
+    shutdown(serverFD, SHUT_RDWR);  
      
     return 0;
 }

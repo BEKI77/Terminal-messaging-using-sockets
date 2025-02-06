@@ -5,6 +5,9 @@
 #include <string.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <curses.h>
+#include <pthread.h>
+
 
 int createTCPIpv4Socket();
 struct sockaddr_in* createIpv4Address(char* ip, int port);
