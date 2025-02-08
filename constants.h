@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <curses.h>
 #include <pthread.h>
-
+#include <stdlib.h>
 
 int createTCPIpv4Socket();
 struct sockaddr_in* createIpv4Address(char* ip, int port);

@@ -2,12 +2,18 @@
 
 int main(int argc, char * argv[]) {
     // File descriptor
+    if(argc<3){
+        perror("Too short arguments: ./client ip-address port-number\n");
+        return -1;
+    }
     int clientFD = createTCPIpv4Socket();
 
-    int port = 2000;
-    char* ip = "127.0.0.1 ";
-
-
+    int port = atoi(argv[2]);
+    char* ip = argv[1];
+    // char str[10];
+    // sprintf(str, "%d", port);
+    printf("port: %d\n",port);
+    printf("ip: %s\n", ip);
     if (clientFD<0){
         perror("socket error");
         return -1;

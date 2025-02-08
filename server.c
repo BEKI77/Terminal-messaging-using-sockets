@@ -55,16 +55,13 @@ void startAcceptingIncomingConnections(int serverFD){
 }
 
 
-
-
-
-
-
-
 int main(int argc, char* argv[]){
-    int port = 2000;
+    if (argc<2){
+        perror("Short argument: ./server port\n");
+        return -1;
+    }
+    int port = atoi(argv[1]);
     char* ip = "";
-    
     // File descriptor
     int serverFD = socket(AF_INET, SOCK_STREAM, 0);
 
