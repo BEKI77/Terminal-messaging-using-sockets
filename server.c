@@ -7,6 +7,17 @@ struct AcceptedSocket{
     bool acceptedSuccessfully;
 };
 
+struct AcceptedSocket acceptedSockets[10];
+int acceptedSocketsCount = 0;
+
+void sendReceivedMessagesToOtherClients(int socketFD, char* buffer){
+    for(int i =0; i<acceptedSocketsCount; i++){
+        if(acceptedSockets[i].acceptedSocketFD!=socketFD){
+            send(acceptedSockets[i].acceptedSocketFD, buffer, strlen(buffer),0);
+        }
+
+    }
+}
 
 void receiveAndPrintIncomingData(int socketFD){
     char buffer[1024];
@@ -14,7 +25,11 @@ void receiveAndPrintIncomingData(int socketFD){
     while(1){
         ssize_t receivedAmount = recv(socketFD, &buffer, 1024, 0);
         if(receivedAmount>0){
-            printf("Message: %s \n", buffer);
+            buffer[receivedAmount] = 0;
+            printf("%s \n", buffer);
+
+            sendReceivedMessagesToOtherClients(socketFD, buffer);
+
         }else
             break;
     }
@@ -48,11 +63,14 @@ struct AcceptedSocket* acceptIncomgingConnection(int serverSocketFD){
 
 void startAcceptingIncomingConnections(int serverFD){
     while(1){
-        struct AcceptedSocket* clientFD = acceptIncomgingConnection(serverFD);
-        receiveAndPrintIncomingDataOnSeparateThread(clientFD);
+        struct AcceptedSocket* clientSocket = acceptIncomgingConnection(serverFD);
+        acceptedSockets[acceptedSocketsCount++] = *clientSocket;
+        receiveAndPrintIncomingDataOnSeparateThread(clientSocket);
     } 
 
 }
+
+
 
 
 int main(int argc, char* argv[]){
