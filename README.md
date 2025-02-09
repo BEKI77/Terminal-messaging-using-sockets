@@ -23,7 +23,7 @@ make all
 To run the server, use the following command:
 
 ```sh
-./server
+./server port-number-to-listen-over
 ```
 The server will bind to the specified IP address and port, and listen for incoming connections.
 
@@ -32,7 +32,7 @@ The server will bind to the specified IP address and port, and listen for incomi
 To run the client, use the following command:
 
 ```sh
-./client
+./client ip-address-target-device port-number-of-target-device
 ```
 
 The client will connect to the server at the specified IP address and port. You can then enter messages to send to the server. Type exit to end the client session.
